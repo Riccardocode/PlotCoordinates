@@ -3,7 +3,7 @@ from folium.plugins import MarkerCluster
 import csv
 from selenium import webdriver
 import time
-import urllib
+
 
 layerControl = 0
 x = "C:\plotcoordinates\my_map.html"
