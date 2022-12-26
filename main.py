@@ -9,8 +9,14 @@ layerControl = 0
 x = "C:\plotcoordinates\my_map.html"
 refreshrate = 10
 results = []
-lat = 41.93368114  # TODO: put general coordinates (magari dal primo elemento del file; gestire errore se non ci sono elementi)
-lon = 12.53232093
+
+with open("C:\\plotcoordinates\\coordinates.txt") as f:
+    firstline = f.readline().rstrip()
+    c = firstline.split(',')
+    lat = float(c[1])
+    lon = float(c[2])
+print(firstline)
+
 m = folium.Map(location=[lat, lon], zoom_start=12)
 # Aggiungo i due cluster (plastica e non) alla mappa
 PlasticaCluster = MarkerCluster(name="Plastica").add_to(m)
@@ -20,8 +26,6 @@ m.save(x)  # salvo la mappa prima di impostare selenium
 driver = webdriver.Firefox()
 driver.get(x)
 
-# TODO:  1. Leggo il file nuovamnete da zero? o posso leggere solo i nuovi elementi?
-# TODO:  2. Se leggo nuovamente tutto il file, devo resettare il vettore result ad ogni iterazione
 while True:
     N = len(results)
     csvfile = open("C:\plotcoordinates\coordinates.txt", 'r')
@@ -53,6 +57,3 @@ while True:
     time.sleep(refreshrate)
     driver.refresh()
 
-# TODO: da ottimizzare la gestioner dell'array results.
-# Invece di cancellare tutti gli elementi, bisogna mantenerli ed aggiungere solo quelli nuovi dal file
-# si dovrebbe accedere solamente ai nuovi elementi del file in modo da risparmiare memoria e CPU clocks
