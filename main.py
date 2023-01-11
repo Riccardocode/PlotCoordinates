@@ -29,8 +29,8 @@ try:
     m.save(x)  # salvo la mappa
 
     #Commentare le prossime due righe se si vuole disattivare l'aggiornamento automatico (commentare anche un altra riga sotto)
-    driver = webdriver.Firefox()            #allorazione del webdriver per il refresh automatico.
-    driver.get(x)                           #prende la mappa e la aggiorna in automatico.
+    #driver = webdriver.Firefox()            #allorazione del webdriver per il refresh automatico.
+    #driver.get(x)                           #prende la mappa e la aggiorna in automatico.
 
     while True:
         N = len(results)
@@ -88,6 +88,6 @@ try:
 
 
         time.sleep(refreshrate)
-        driver.refresh()    # refresh page automatico. commentare questa riga per disattivarlo (commentare anche altre due righe sopra)
+        #driver.refresh()    # refresh page automatico. commentare questa riga per disattivarlo (commentare anche altre due righe sopra)
 except FileNotFoundError:
     print("File Not Found")
