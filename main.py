@@ -24,8 +24,8 @@ try:
 
     m = folium.Map(location=[lat, lon], zoom_start=12)
     # Aggiungo i due cluster (plastica e non) alla mappa
-    PlasticaCluster = MarkerCluster(name="Plastica").add_to(m)
-    NoPlasticaCluster = MarkerCluster(name="No-Plastica").add_to(m)
+    PlasticaCluster = MarkerCluster(name="Plastica", maxClusterRadius=0.00000001).add_to(m)
+    NoPlasticaCluster = MarkerCluster(name="No-Plastica", maxClusterRadius=0.00000001).add_to(m)
     m.save(x)  # salvo la mappa
 
     #Commentare le prossime due righe se si vuole disattivare l'aggiornamento automatico (commentare anche un altra riga sotto)
