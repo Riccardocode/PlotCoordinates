@@ -11,7 +11,7 @@ import time
 
 layerControl = 0
 x = "C:\plotcoordinates\my_map.html"
-refreshrate = 5
+refreshrate = 8
 results = []
 try:
     with open("C:\\plotcoordinates\\coordinates.txt") as f:
@@ -22,15 +22,15 @@ try:
     print(firstline)
 
 
-    m = folium.Map(location=[lat, lon], zoom_start=12)
+    m = folium.Map(location=[lat, lon], zoom_start=19)
     # Aggiungo i due cluster (plastica e non) alla mappa
     PlasticaCluster = MarkerCluster(name="Plastica", maxClusterRadius=0.00000001).add_to(m)
     NoPlasticaCluster = MarkerCluster(name="No-Plastica", maxClusterRadius=0.00000001).add_to(m)
     m.save(x)  # salvo la mappa
 
     #Commentare le prossime due righe se si vuole disattivare l'aggiornamento automatico (commentare anche un altra riga sotto)
-    #driver = webdriver.Firefox()            #allorazione del webdriver per il refresh automatico.
-    #driver.get(x)                           #prende la mappa e la aggiorna in automatico.
+    driver = webdriver.Firefox()            #allorazione del webdriver per il refresh automatico.
+    driver.get(x)                           #prende la mappa e la aggiorna in automatico.
 
     while True:
         N = len(results)
@@ -84,10 +84,15 @@ try:
         if (layerControl == 0):
             folium.LayerControl().add_to(m)
             layerControl = 1
+        m.location = [cords[1], cords[2]]
+        #m.fit_bounds(m.get_bounds(), padding=(30, 30))
         m.save(x)
 
 
+
         time.sleep(refreshrate)
-        #driver.refresh()    # refresh page automatico. commentare questa riga per disattivarlo (commentare anche altre due righe sopra)
+
+
+        driver.refresh()    # refresh page automatico. commentare questa riga per disattivarlo (commentare anche altre due righe sopra)
 except FileNotFoundError:
     print("File Not Found")
