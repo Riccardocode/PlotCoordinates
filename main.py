@@ -9,30 +9,38 @@ import csv
 from selenium import webdriver
 import time
 
+lat = 41.89
+lon = 12.49
+firstline=""
 layerControl = 0
 x = "C:\plotcoordinates\my_map.html"
-refreshrate = 8
+refreshrate = 5
 results = []
 num_plastic=0
 num_noPlastic=0
 try:
     with open("C:\\plotcoordinates\\coordinates.txt") as f:
         firstline = f.readline().rstrip()
-        c = firstline.split(',')
-        lat = float(c[1])
-        lon = float(c[2])
+        if(firstline!=""):
+            c = firstline.split(',')
+            lat = float(c[1])
+            lon = float(c[2])
     print("Map initialized!")
 
 
     m = folium.Map(location=[lat, lon], zoom_start=19)
     # Aggiungo i due cluster (plastica e non) alla mappa
-    PlasticaCluster = MarkerCluster(name="Plastica", maxClusterRadius=1, overlay=lambda zoom: zoom <= 18).add_to(m)
-    NoPlasticaCluster = MarkerCluster(name="No-Plastica", maxClusterRadius=1, overlay=lambda zoom: zoom <= 18).add_to(m)
+
+
+    NoPlasticaCluster = MarkerCluster(name="No-Plastica", maxClusterRadius=0.00000001, overlay=lambda zoom: zoom <= 18).add_to(m)
+    PlasticaCluster = MarkerCluster(name="Plastica", maxClusterRadius=0.00000001, overlay=lambda zoom: zoom <= 18 ).add_to(m)
+
     # PlasticaCluster = MarkerCluster(name="Plastica", overlay=lambda zoom: zoom >= 17, radius=0.00000000001).add_to(m)
     # NoPlasticaCluster = MarkerCluster(name="No-Plastica", overlay=lambda zoom: zoom >= 17, radius=0.00000000001).add_to(m)
     m.save(x)  # salvo la mappa
 
-    #Commentare le prossime due righe se si vuole disattivare l'aggiornamento automatico (commentare anche un altra riga sotto)
+    #Commentare le prossime due righe se si vuole disattivare l'aggiornamento automatico
+    # (commentare anche un altra riga sotto)
     driver = webdriver.Firefox()            #allorazione del webdriver per il refresh automatico.
     driver.get(x)                           #prende la mappa e la aggiorna in automatico.
 
@@ -41,7 +49,8 @@ try:
         csvfile = open("C:\plotcoordinates\coordinates.txt", 'r')
         reader = csv.reader(csvfile.readlines()[N:])  # change contents to floats
         for row in reader:  # each row is a list
-            results.append(row)
+            if((row!="") or (row!="/n")):
+                results.append(row)
         #print(results)
         csvfile.close()
 
@@ -63,17 +72,25 @@ try:
                                     contadigits += 1
                             contapunti = cords[2].count(".")
                             if contapunti + contadigits == len(cords[2]):
-                                if float(cords[1]) >= -90 and float(cords[1]) <= 90 and float(cords[2]) >= -180 and float(cords[2]) <= 180:
+                                if float(cords[1]) >= -90 and float(cords[1]) <= 90 and \
+                                        float(cords[2]) >= -180 and float(cords[2]) <= 180:
                                     if int(cords[0]) == 1:
                                         num_plastic+=1
-                                        folium.CircleMarker(location=[cords[1], cords[2]], radius=3,
+                                        folium.CircleMarker(location=[cords[1], cords[2]], radius=2,
                                                             popup="{0},{1}".format(cords[1], cords[2]),
-                                                            color="red", icon=folium.Icon(icon_color='red')).add_to(PlasticaCluster)
+                                                            color="red",
+
+                                                            icon=folium.Icon(icon_color='red')).add_to(PlasticaCluster)
                                     elif int(cords[0]) == 0:
                                         num_noPlastic+=1
-                                        folium.CircleMarker(location=[cords[1], cords[2]], radius=3,
+                                        folium.CircleMarker(location=[cords[1], cords[2]], radius=2,
                                                             popup="{0},{1}".format(cords[1], cords[2]),
-                                                            color="green", icon=folium.Icon(icon_color='green')).add_to(NoPlasticaCluster)
+                                                            color="green",
+
+                                                            icon=folium.Icon(icon_color='green')).\
+                                                            add_to(NoPlasticaCluster)
+
+
                                     else:
                                         print("coordinates discarded")
                                 else:
@@ -86,19 +103,21 @@ try:
                 else:
                     print("coordinates discarded")
 
-        # Aggiungo il controlLayer alla mappa
-        if (layerControl == 0):
-            folium.LayerControl().add_to(m)
-            layerControl = 1
-        m.location = [cords[1], cords[2]]
-        #m.fit_bounds(m.get_bounds(), padding=(30, 30))
-        m.save(x)
-        print("Number of plastic is: ", num_plastic, "out of ", num_plastic+num_noPlastic, " coordinates processed")
+            # Aggiungo il controlLayer alla mappa
+            if (layerControl == 0):
+
+                folium.LayerControl().add_to(m)
+                layerControl = 1
+            m.location = [cords[1], cords[2]]
+            #m.fit_bounds(m.get_bounds(), padding=(30, 30))
+            m.save(x)
+            print("Number of plastic is: ", num_plastic, "out of ", num_plastic+num_noPlastic, " coordinates processed")
+
 
 
         time.sleep(refreshrate)
 
-
-        driver.refresh()    # refresh page automatico. commentare questa riga per disattivarlo (commentare anche altre due righe sopra)
+        # refresh page automatico. commentare questa riga per disattivarlo (commentare anche altre due righe sopra)
+        driver.refresh()
 except FileNotFoundError:
     print("File Not Found")
