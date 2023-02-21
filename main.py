@@ -16,8 +16,13 @@ layerControl = 0
 x = "C:\plotcoordinates\my_map.html"
 refreshrate = 5
 results = []
+loadedCoords=[]
 num_plastic=0
 num_noPlastic=0
+coordRepeated =0
+#when IMU does not connect to GPS, it send the 0,0,0 coordinate
+#zeroCoordinate flag is used to detect and remove the 0,0,0 coordinate
+zeroCoordinate=0
 try:
     with open("C:\\plotcoordinates\\coordinates.txt") as f:
         firstline = f.readline().rstrip()
@@ -74,21 +79,34 @@ try:
                             if contapunti + contadigits == len(cords[2]):
                                 if float(cords[1]) >= -90 and float(cords[1]) <= 90 and \
                                         float(cords[2]) >= -180 and float(cords[2]) <= 180:
-                                    if int(cords[0]) == 1:
-                                        num_plastic+=1
+                                    coordRepeated = 0
+                                    zeroCoordinate = 0
+                                    #verifico che lat e lon non siano 0 (Imu usa coord 0 quando non si connette al GPS)
+                                    if cords[1] == '0' and cords[2] == '0':
+                                        zeroCoordinate=1
+                                        print("Zero coordinate has been discarded: " + cords[0] + ',' + cords[1] + ',' +cords[2])
+                                    #confronto che le coordinate non siano state gia' caricate nella mappa
+                                    #per evitare la formazione di cluster.
+                                    if len(loadedCoords) > 0 and zeroCoordinate == 0:
+                                        for loadCoord in loadedCoords:
+                                            if loadCoord[0] == cords[0] and loadCoord[1] == cords[1] and loadCoord[2] == cords[2]:
+                                                coordRepeated = 1
+                                                print("duplicated coordinates: " + cords[0] + ',' + cords[1] + ',' + cords[2])
+                                    if zeroCoordinate == 0 and coordRepeated == 0 and int(cords[0]) == 1:
+                                        num_plastic += 1
                                         folium.CircleMarker(location=[cords[1], cords[2]], radius=2,
                                                             popup="{0},{1}".format(cords[1], cords[2]),
                                                             color="red",
-
                                                             icon=folium.Icon(icon_color='red')).add_to(PlasticaCluster)
-                                    elif int(cords[0]) == 0:
+                                        loadedCoords.append([cords[0], cords[1], cords[2]])
+                                    elif zeroCoordinate == 0 and coordRepeated == 0 and int(cords[0]) == 0:
                                         num_noPlastic+=1
                                         folium.CircleMarker(location=[cords[1], cords[2]], radius=2,
                                                             popup="{0},{1}".format(cords[1], cords[2]),
                                                             color="green",
-
                                                             icon=folium.Icon(icon_color='green')).\
                                                             add_to(NoPlasticaCluster)
+                                        loadedCoords.append([cords[0], cords[1], cords[2]])
 
 
                                     else:
